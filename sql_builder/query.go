@@ -76,13 +76,15 @@ func Query(db *sql.DB, sql string) ([]map[string]interface{}, error) {
 	if nil == rows {
 		return nil, err
 	}
+	defer rows.Close()
 	return ParseRows(rows)
 }
 
-func QueryObj(db *sql.DB, sql string, model interface{}) (interface{}, error) {
+func QueryObj(db *sql.DB, model interface{}, sql string) (interface{}, error) {
 	rows, err := db.Query(sql)
 	if nil == rows {
 		return nil, err
 	}
+	defer rows.Close()
 	return ParseRowsObj(rows, model)
 }
