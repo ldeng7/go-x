@@ -57,37 +57,19 @@ func main() {
 	// Returning a string like:
 	// UPDATE tests SET col1 = '1', col2 = '2\n2' WHERE col1 = 3 AND col2 = '4\n4' AND col3 IN ('5', '6\n6');
 	sql_builder.Sql("UPDATE tests SET #{pairs} WHERE col1 = #{v1} AND col2 = #{v2} AND col3 IN (#{vs});",
-		map[string]sql_builder.Arg{
-			"pairs": sql_builder.Arg{
-				Type:  sql_builder.ArgTypeStringMap,
-				Value: map[string]string{"col1": "1", "col2": "2\n2"},
-			},
-			"v1": sql_builder.Arg{
-				Type:  sql_builder.ArgTypeString,
-				Value: "3",
-			},
-			"v2": sql_builder.Arg{
-				Type:  sql_builder.ArgTypeQuotedString,
-				Value: "4\n4",
-			},
-			"vs": sql_builder.Arg{
-				Type:  sql_builder.ArgTypeQuotedStringArray,
-				Value: []string{"5", "6\n6"},
-			},
+		map[string]interface{}{
+			"pairs": map[string]sql_builder.Quote{"col1": "1", "col2": "2\n2"},
+			"v1":    "3",
+			"v2":    sql_builder.Quote("4\n4"),
+			"vs":    []sql_builder.Quote{"5", "6\n6"},
 		})
 
 	// Returning a string like:
 	// INSERT INTO tests (col1, col2) VALUES ('1', '2'), ('3', '4\n4');
 	sql_builder.Sql("INSERT INTO tests (#{columns}) VALUES #{values};",
-		map[string]sql_builder.Arg{
-			"columns": sql_builder.Arg{
-				Type:  sql_builder.ArgTypeStringArray,
-				Value: []string{"col1, col2"},
-			},
-			"values": sql_builder.Arg{
-				Type:  sql_builder.ArgTypeArrayArray,
-				Value: [][]string{[]string{"1", "2"}, []string{"3", "4\n4"}},
-			},
+		map[string]interface{}{
+			"columns": []string{"col1, col2"},
+			"values":  [][]sql_builder.Quote{[]sql_builder.Quote{"1", "2"}, []sql_builder.Quote{"3", "4\n4"}},
 		})
 }
 ```

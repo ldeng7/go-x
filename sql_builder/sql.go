@@ -6,21 +6,9 @@ import (
 	"strings"
 )
 
-const (
-	ArgTypeString = iota
-	ArgTypeQuotedString
-	ArgTypeStringArray
-	ArgTypeQuotedStringArray
-	ArgTypeStringMap
-	ArgTypeArrayArray
-)
+type Quote string
 
-type Arg struct {
-	Type  int
-	Value interface{}
-}
-
-func Sql(sql string, args map[string]Arg) string {
+func Sql(sql string, args map[string]interface{}) string {
 	m := parseArgs(args)
 	return reg.ReplaceAllStringFunc(sql, genReplFunc(m))
 }
@@ -31,7 +19,7 @@ func init() {
 	reg = regexp.MustCompile("#\\{([\\w]+)\\}")
 }
 
-func quote(s string) string {
+func quote(s Quote) string {
 	bytes := []byte(s)
 	out := make([]byte, len(bytes)*2+2)
 
@@ -88,58 +76,40 @@ func quote(s string) string {
 	return string(out[:i])
 }
 
-func parseArgs(args map[string]Arg) map[string]string {
+func parseArgs(args map[string]interface{}) map[string]string {
 	out := make(map[string]string)
 	for ka, a := range args {
-		switch a.Type {
-		case ArgTypeString:
-			s, ok := a.Value.(string)
-			if ok {
-				out[ka] = s
+		switch arg := a.(type) {
+		case string:
+			out[ka] = arg
+		case Quote:
+			out[ka] = quote(arg)
+		case []string:
+			out[ka] = strings.Join(arg, ", ")
+		case []Quote:
+			arr := make([]string, len(arg))
+			for i, s := range arg {
+				arr[i] = quote(s)
 			}
-		case ArgTypeQuotedString:
-			s, ok := a.Value.(string)
-			if ok {
-				out[ka] = quote(s)
+			out[ka] = strings.Join(arr, ", ")
+		case map[string]Quote:
+			arr := make([]string, len(arg))
+			i := 0
+			for k, v := range arg {
+				arr[i] = fmt.Sprintf("%s = %s", k, quote(v))
+				i++
 			}
-		case ArgTypeStringArray:
-			arr, ok := a.Value.([]string)
-			if ok {
-				out[ka] = strings.Join(arr, ", ")
-			}
-		case ArgTypeQuotedStringArray:
-			arr, ok := a.Value.([]string)
-			if ok {
-				arrO := make([]string, len(arr))
-				for i, s := range arr {
-					arrO[i] = quote(s)
+			out[ka] = strings.Join(arr, ", ")
+		case [][]Quote:
+			arr := make([]string, len(arg))
+			for i, arrE := range arg {
+				arrOE := make([]string, len(arrE))
+				for j, e := range arrE {
+					arrOE[j] = quote(e)
 				}
-				out[ka] = strings.Join(arrO, ", ")
+				arr[i] = strings.Join(arrOE, ", ")
 			}
-		case ArgTypeStringMap:
-			m, ok := a.Value.(map[string]string)
-			if ok {
-				arrO := make([]string, len(m))
-				i := 0
-				for k, v := range m {
-					arrO[i] = fmt.Sprintf("%s = %s", k, quote(v))
-					i++
-				}
-				out[ka] = strings.Join(arrO, ", ")
-			}
-		case ArgTypeArrayArray:
-			arr, ok := a.Value.([][]string)
-			if ok {
-				arrO := make([]string, len(arr))
-				for i, arrE := range arr {
-					arrOE := make([]string, len(arrE))
-					for j, e := range arrE {
-						arrOE[j] = quote(e)
-					}
-					arrO[i] = strings.Join(arrOE, ", ")
-				}
-				out[ka] = fmt.Sprintf("(%s)", strings.Join(arrO, "), ("))
-			}
+			out[ka] = fmt.Sprintf("(%s)", strings.Join(arr, "), ("))
 		}
 	}
 	return out
