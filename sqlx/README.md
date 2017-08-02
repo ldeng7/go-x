@@ -1,7 +1,7 @@
 Name
 ====
 
-sql_builder
+sqlx
 
 A light-weighted sql client wrapper, containing a sql builder and a result set parser.
 
@@ -16,7 +16,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/ldeng7/go-x/sql_builder"
+	"github.com/ldeng7/go-x/sqlx"
 )
 
 type TestModel struct {
@@ -33,7 +33,7 @@ func main() {
 	defer db.Close()
 	{
 		// Directly passing a sql, and returning a slice of map
-		res, _ := sql_builder.Query(db, "SELECT id, vc_str AS str FROM tests LIMIT 5;")
+		res, _ := sqlx.Query(db, "SELECT id, vc_str AS str FROM tests LIMIT 5;")
 
 		for _, m := range res {
 			for k, v := range m {
@@ -44,7 +44,7 @@ func main() {
 
 	{
 		// Returning a slice of struct
-		res, _ := sql_builder.QueryObj(db, TestModel{}, "SELECT id, vc_str FROM tests LIMIT 5;")
+		res, _ := sqlx.QueryObj(db, TestModel{}, "SELECT id, vc_str FROM tests LIMIT 5;")
 
 		models := res.([]TestModel)
 		for _, model := range models {
@@ -56,20 +56,20 @@ func main() {
 
 	// Returning a string like:
 	// UPDATE tests SET col1 = '1', col2 = '2\n2' WHERE col1 = 3 AND col2 = '4\n4' AND col3 IN ('5', '6\n6');
-	sql_builder.Sql("UPDATE tests SET #{pairs} WHERE col1 = #{v1} AND col2 = #{v2} AND col3 IN (#{vs});",
+	sqlx.Sql("UPDATE tests SET #{pairs} WHERE col1 = #{v1} AND col2 = #{v2} AND col3 IN (#{vs});",
 		map[string]interface{}{
-			"pairs": map[string]sql_builder.Quote{"col1": "1", "col2": "2\n2"},
+			"pairs": map[string]sqlx.Quote{"col1": "1", "col2": "2\n2"},
 			"v1":    "3",
-			"v2":    sql_builder.Quote("4\n4"),
-			"vs":    []sql_builder.Quote{"5", "6\n6"},
+			"v2":    sqlx.Quote("4\n4"),
+			"vs":    []sqlx.Quote{"5", "6\n6"},
 		})
 
 	// Returning a string like:
 	// INSERT INTO tests (col1, col2) VALUES ('1', '2'), ('3', '4\n4');
-	sql_builder.Sql("INSERT INTO tests (#{columns}) VALUES #{values};",
+	sqlx.Sql("INSERT INTO tests (#{columns}) VALUES #{values};",
 		map[string]interface{}{
 			"columns": []string{"col1, col2"},
-			"values":  [][]sql_builder.Quote{[]sql_builder.Quote{"1", "2"}, []sql_builder.Quote{"3", "4\n4"}},
+			"values":  [][]sqlx.Quote{[]sqlx.Quote{"1", "2"}, []sqlx.Quote{"3", "4\n4"}},
 		})
 }
 ```
