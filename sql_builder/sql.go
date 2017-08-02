@@ -11,8 +11,7 @@ const (
 	ArgTypeQuotedString
 	ArgTypeStringArray
 	ArgTypeQuotedStringArray
-	ArgTypeMap
-	ArgTypeKVArrays
+	ArgTypeStringMap
 	ArgTypeArrayArray
 )
 
@@ -117,27 +116,16 @@ func parseArgs(args map[string]Arg) map[string]string {
 				}
 				out[ka] = strings.Join(arrO, ", ")
 			}
-		case ArgTypeMap:
+		case ArgTypeStringMap:
 			m, ok := a.Value.(map[string]string)
 			if ok {
 				arrO := make([]string, len(m))
 				i := 0
 				for k, v := range m {
 					arrO[i] = fmt.Sprintf("%s = %s", k, quote(v))
+					i++
 				}
 				out[ka] = strings.Join(arrO, ", ")
-			}
-		case ArgTypeKVArrays:
-			arr, ok := a.Value.([][]string)
-			if ok && (len(arr) >= 2) {
-				arrK, arrV := arr[0], arr[1]
-				if len(arrV) >= len(arrK) {
-					arrO := make([]string, len(arrK))
-					for i, k := range arrK {
-						arrO[i] = fmt.Sprintf("%s = %s", k, quote(arrV[i]))
-					}
-					out[ka] = strings.Join(arrO, ", ")
-				}
 			}
 		case ArgTypeArrayArray:
 			arr, ok := a.Value.([][]string)
