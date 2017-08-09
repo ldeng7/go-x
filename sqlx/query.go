@@ -8,7 +8,7 @@ import (
 
 func ParseRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 	cols, err := rows.Columns()
-	if nil == cols {
+	if nil != err {
 		return nil, err
 	}
 	nCol := len(cols)
@@ -45,7 +45,7 @@ func ParseRowsObj(rows *sql.Rows, model interface{}) (interface{}, error) {
 	}
 
 	cols, err := rows.Columns()
-	if nil == cols {
+	if nil != err {
 		return nil, err
 	}
 	nCol := len(cols)
@@ -73,7 +73,7 @@ func ParseRowsObj(rows *sql.Rows, model interface{}) (interface{}, error) {
 
 func Query(db *sql.DB, sql string) ([]map[string]interface{}, error) {
 	rows, err := db.Query(sql)
-	if nil == rows {
+	if nil != err {
 		return nil, err
 	}
 	defer rows.Close()
@@ -82,7 +82,7 @@ func Query(db *sql.DB, sql string) ([]map[string]interface{}, error) {
 
 func QueryObj(db *sql.DB, model interface{}, sql string) (interface{}, error) {
 	rows, err := db.Query(sql)
-	if nil == rows {
+	if nil != err {
 		return nil, err
 	}
 	defer rows.Close()
