@@ -16,13 +16,22 @@ const (
 	EMERG
 )
 
+var levelsStr = map[int]string{
+	INFO:   "[\x1b[1;42;37mINFO\x1b[0m]",
+	NOTICE: "[\x1b[1;42;37mNOTICE\x1b[0m]",
+	WARN:   "[\x1b[1;43;37mWARN\x1b[0m]",
+	ERR:    "[\x1b[1;41;37mERR\x1b[0m]",
+	CRIT:   "[\x1b[1;45;37mCRIT\x1b[0m]",
+	EMERG:  "[\x1b[1;45;37mEMERG\x1b[0m]",
+}
+
 const (
 	fileFlag = os.O_WRONLY | os.O_APPEND | os.O_CREATE
 	fileMode = 0666
 )
 
 type InitArgs struct {
-	Out      io.Writer
+	Writer   io.Writer
 	Filename string
 	Prefix   string
 	Flags    int
@@ -31,31 +40,40 @@ type InitArgs struct {
 
 type Logger struct {
 	Logger   *log.Logger
-	Out      io.Writer
-	logLevel int
+	LogLevel int
+	writer   io.Writer
 }
 
-func Init(args *InitArgs) error {
+func Init(args *InitArgs) (*Logger, error) {
 	self := &Logger{
-		logLevel: args.LogLevel,
+		LogLevel: args.LogLevel,
 	}
 
-	out := args.Out
-	if nil == out {
+	writer := args.Writer
+	if nil == writer {
 		file, err := os.OpenFile(args.Filename, fileFlag, fileMode)
 		if nil != err {
-			return err
+			return nil, err
 		}
-		out = file
+		writer = file
 	}
 
-	self.Out = out
-	self.Logger = log.New(out, args.Prefix, args.Flags)
-	return nil
+	self.writer = writer
+	self.Logger = log.New(writer, args.Prefix, args.Flags)
+	return self, nil
+}
+
+func (l *Logger) GetWriter() io.Writer {
+	return l.writer
+}
+
+func (l *Logger) SetWriter(writer io.Writer) {
+	l.writer = writer
+	l.Logger.SetOutput(writer)
 }
 
 func (l *Logger) FileRotate() (*os.File, error) {
-	file, ok := l.Out.(*os.File)
+	file, ok := l.writer.(*os.File)
 	if !ok {
 		return nil, nil
 	}
@@ -63,8 +81,7 @@ func (l *Logger) FileRotate() (*os.File, error) {
 	if nil != err {
 		return nil, err
 	}
-	l.Out = fileNew
-	l.Logger.SetOutput(fileNew)
+	l.SetWriter(fileNew)
 	return file, nil
 }
 
@@ -73,10 +90,14 @@ func (l *Logger) log(calldepth int, level int, v []interface{}) {
 		fmt.Println(v)
 		return
 	}
-	if level < l.logLevel {
+	if level < l.LogLevel {
 		return
 	}
-	l.Logger.Output(calldepth, fmt.Sprintln(v...))
+	levelStr, ok := levelsStr[level]
+	if !ok {
+		levelStr = fmt.Sprintf("[level %d]", level)
+	}
+	l.Logger.Output(calldepth, fmt.Sprintf("%s%s", levelStr, fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Log(level int, v ...interface{}) {
