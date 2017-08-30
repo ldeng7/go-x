@@ -44,9 +44,9 @@ func main() {
 
 	{
 		// Returning a slice of struct
-		res, _ := sqlx.QueryObj(db, TestModel{}, "SELECT id, vc_str FROM tests LIMIT 5;")
+        models := make([]*TestModel, 0)
+		_ := sqlx.QueryObj(db, &models, "SELECT id, vc_str FROM tests LIMIT 5;")
 
-		models := res.([]TestModel)
 		for _, model := range models {
 			fmt.Printf("id: %d\n", model.Id)
 			str, _ := model.VcStr.Value()

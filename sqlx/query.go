@@ -12,18 +12,18 @@ func ParseRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 		return nil, err
 	}
 	nCol := len(cols)
-	elems := make([]interface{}, nCol)
-	elemPtrs := make([]interface{}, nCol)
+	valsCol := make([]interface{}, nCol)
+	ptrsCol := make([]interface{}, nCol)
 	for i := 0; i < nCol; i++ {
-		elemPtrs[i] = &elems[i]
+		ptrsCol[i] = &valsCol[i]
 	}
 
 	out := make([]map[string]interface{}, 0)
 	for rows.Next() {
 		e := make(map[string]interface{})
-		rows.Scan(elemPtrs...)
+		rows.Scan(ptrsCol...)
 		for i := 0; i < nCol; i++ {
-			if v := elems[i]; nil != v {
+			if v := valsCol[i]; nil != v {
 				e[cols[i]] = v
 			}
 		}
@@ -32,11 +32,29 @@ func ParseRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 	return out, nil
 }
 
-func ParseRowsObj(rows *sql.Rows, model interface{}) (interface{}, error) {
-	typModel := reflect.TypeOf(model)
-	if reflect.Struct != typModel.Kind() {
-		return nil, errors.New("argument \"model\" must be a struct")
+func ParseRowsObj(rows *sql.Rows, models interface{}) error {
+	errTyp := errors.New("models must be a pointer to a slice of pointer of struct")
+	typPtr := reflect.TypeOf(models)
+	if reflect.Ptr != typPtr.Kind() {
+		return errTyp
 	}
+	typSl := typPtr.Elem()
+	if reflect.Slice != typSl.Kind() {
+		return errTyp
+	}
+	typElem := typSl.Elem()
+	if reflect.Ptr != typElem.Kind() {
+		return errTyp
+	}
+	typModel := typElem.Elem()
+	if reflect.Struct != typModel.Kind() {
+		return errTyp
+	}
+	valPtr := reflect.ValueOf(models)
+	if 0 == valPtr.Pointer() {
+		return errors.New("models is an empty pointer")
+	}
+
 	nField := typModel.NumField()
 	fieldMap := make(map[string]int)
 	for i := 0; i < nField; i++ {
@@ -46,29 +64,31 @@ func ParseRowsObj(rows *sql.Rows, model interface{}) (interface{}, error) {
 
 	cols, err := rows.Columns()
 	if nil != err {
-		return nil, err
+		return err
 	}
 	nCol := len(cols)
-	elems := make([]interface{}, nCol)
-	elemPtrs := make([]interface{}, nCol)
+	valsCol := make([]interface{}, nCol)
+	ptrsCol := make([]interface{}, nCol)
 	for i := 0; i < nCol; i++ {
-		elemPtrs[i] = &elems[i]
+		ptrsCol[i] = &valsCol[i]
 	}
 
-	out := reflect.MakeSlice(reflect.SliceOf(typModel), 0, 8)
+	valSl := reflect.MakeSlice(reflect.SliceOf(typElem), 0, 8)
 	for rows.Next() {
-		e := reflect.Indirect(reflect.New(typModel))
-		rows.Scan(elemPtrs...)
+		valElem := reflect.New(typModel)
+		valModel := reflect.Indirect(valElem)
+		rows.Scan(ptrsCol...)
 		for i := 0; i < nCol; i++ {
 			iField, need := fieldMap[cols[i]]
-			if v := elems[i]; need && (nil != v) {
-				field := e.Field(iField)
+			if v := valsCol[i]; need && (nil != v) {
+				field := valModel.Field(iField)
 				setField(&field, v)
 			}
 		}
-		out = reflect.Append(out, e)
+		valSl = reflect.Append(valSl, valElem)
 	}
-	return out.Interface(), nil
+	valPtr.Elem().Set(valSl)
+	return nil
 }
 
 func Query(db *sql.DB, sql string) ([]map[string]interface{}, error) {
@@ -80,11 +100,11 @@ func Query(db *sql.DB, sql string) ([]map[string]interface{}, error) {
 	return ParseRows(rows)
 }
 
-func QueryObj(db *sql.DB, model interface{}, sql string) (interface{}, error) {
+func QueryObj(db *sql.DB, models interface{}, sql string) error {
 	rows, err := db.Query(sql)
 	if nil != err {
-		return nil, err
+		return err
 	}
 	defer rows.Close()
-	return ParseRowsObj(rows, model)
+	return ParseRowsObj(rows, models)
 }
