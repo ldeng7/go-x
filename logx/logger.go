@@ -86,10 +86,6 @@ func (l *Logger) FileRotate() (*os.File, error) {
 }
 
 func (l *Logger) log(calldepth int, level int, v []interface{}) {
-	if nil == l.Logger {
-		fmt.Println(v)
-		return
-	}
 	if level < l.LogLevel {
 		return
 	}
@@ -97,33 +93,82 @@ func (l *Logger) log(calldepth int, level int, v []interface{}) {
 	if !ok {
 		levelStr = fmt.Sprintf("[level %d]", level)
 	}
-	l.Logger.Output(calldepth, fmt.Sprintf("%s%s", levelStr, fmt.Sprintln(v...)))
+	s := fmt.Sprintf("%s%s\n", levelStr, fmt.Sprint(v...))
+	if nil != l.Logger {
+		l.Logger.Output(calldepth, s)
+	} else {
+		fmt.Print(s)
+	}
+}
+
+func (l *Logger) logf(calldepth int, level int, format string, v []interface{}) {
+	if level < l.LogLevel {
+		return
+	}
+	levelStr, ok := levelsStr[level]
+	if !ok {
+		levelStr = fmt.Sprintf("[level %d]", level)
+	}
+	s := fmt.Sprintf("%s%s\n", levelStr, fmt.Sprintf(format, v...))
+	if nil != l.Logger {
+		l.Logger.Output(calldepth, s)
+	} else {
+		fmt.Print(s)
+	}
 }
 
 func (l *Logger) Log(level int, v ...interface{}) {
 	l.log(3, level, v)
 }
 
+func (l *Logger) Logf(level int, format string, v ...interface{}) {
+	l.logf(3, level, format, v)
+}
+
 func (l *Logger) Info(v ...interface{}) {
 	l.log(3, INFO, v)
+}
+
+func (l *Logger) Infof(format string, v ...interface{}) {
+	l.logf(3, INFO, format, v)
 }
 
 func (l *Logger) Notice(v ...interface{}) {
 	l.log(3, NOTICE, v)
 }
 
+func (l *Logger) Noticef(format string, v ...interface{}) {
+	l.logf(3, NOTICE, format, v)
+}
+
 func (l *Logger) Warn(v ...interface{}) {
 	l.log(3, WARN, v)
+}
+
+func (l *Logger) Warnf(format string, v ...interface{}) {
+	l.logf(3, WARN, format, v)
 }
 
 func (l *Logger) Err(v ...interface{}) {
 	l.log(3, ERR, v)
 }
 
+func (l *Logger) Errf(format string, v ...interface{}) {
+	l.logf(3, ERR, format, v)
+}
+
 func (l *Logger) Crit(v ...interface{}) {
 	l.log(3, CRIT, v)
 }
 
+func (l *Logger) Critf(format string, v ...interface{}) {
+	l.logf(3, CRIT, format, v)
+}
+
 func (l *Logger) Emerg(v ...interface{}) {
 	l.log(3, EMERG, v)
+}
+
+func (l *Logger) Emergf(format string, v ...interface{}) {
+	l.logf(3, EMERG, format, v)
 }
