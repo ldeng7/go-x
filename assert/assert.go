@@ -49,14 +49,6 @@ func (a *Assert) False(b bool) {
 	a.assert(!b, nil, 1)
 }
 
-func (a *Assert) Nil(got interface{}) {
-	a.assert(nil == got, nil, 1)
-}
-
-func (a *Assert) NotNil(got interface{}) {
-	a.assert(nil != got, nil, 1)
-}
-
 func (a *Assert) Fail(desc string) {
 	fn := func() {
 		a.t.Error("!", desc)
