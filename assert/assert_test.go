@@ -27,6 +27,4 @@ func Test(t *testing.T) {
 	ast.Equal([]tt{tt{i: 1}}, []tt{tt{i: 1}})
 	ast.Equal(ss{i: 1, t: tt{i: 2}}, ss{i: 1, t: tt{i: 2}})
 	ast.NotEqual(1, 0)
-	ast.Nil(nil)
-	ast.NotNil(0)
 }
