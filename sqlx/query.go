@@ -23,9 +23,7 @@ func ParseRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 		e := make(map[string]interface{})
 		rows.Scan(ptrsCol...)
 		for i := 0; i < nCol; i++ {
-			if v := valsCol[i]; nil != v {
-				e[cols[i]] = v
-			}
+			e[cols[i]] = valsCol[i]
 		}
 		out = append(out, e)
 	}
