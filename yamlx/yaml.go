@@ -4,7 +4,7 @@ import (
 	"errors"
 	"reflect"
 
-	yaml "gopkg.in/yaml.v2"
+	"github.com/go-yaml/yaml"
 )
 
 var typString = reflect.TypeOf("")

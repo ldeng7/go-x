@@ -1,10 +1,10 @@
-package maxheap
+package minheap
 
 import (
 	"container/heap"
 )
 
-type MaxHeap struct {
+type MinHeap struct {
 	Pairs   []interface{}
 	SortLen int
 	LessCb  func(ia, ib interface{}) bool
@@ -13,23 +13,23 @@ type MaxHeap struct {
 
 // heap.Interface
 
-func (h *MaxHeap) Len() int {
+func (h *MinHeap) Len() int {
 	return len(h.inner)
 }
 
-func (h *MaxHeap) Less(i, j int) bool {
+func (h *MinHeap) Less(i, j int) bool {
 	return h.LessCb(h.inner[i], h.inner[j])
 }
 
-func (h *MaxHeap) Swap(i, j int) {
+func (h *MinHeap) Swap(i, j int) {
 	h.inner[i], h.inner[j] = h.inner[j], h.inner[i]
 }
 
-func (h *MaxHeap) Push(x interface{}) {
+func (h *MinHeap) Push(x interface{}) {
 	h.inner = append(h.inner, x)
 }
 
-func (h *MaxHeap) Pop() interface{} {
+func (h *MinHeap) Pop() interface{} {
 	inner := h.inner
 	e := len(inner) - 1
 	x := inner[e]
@@ -39,7 +39,7 @@ func (h *MaxHeap) Pop() interface{} {
 
 // heap.Interface end
 
-func (h *MaxHeap) Sort() []interface{} {
+func (h *MinHeap) Sort() []interface{} {
 	l := h.SortLen
 	h.inner = h.Pairs[:l]
 	heap.Init(h)
