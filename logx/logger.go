@@ -45,7 +45,7 @@ type Logger struct {
 }
 
 func Init(args *InitArgs) (*Logger, error) {
-	self := &Logger{
+	l := &Logger{
 		LogLevel: args.LogLevel,
 	}
 
@@ -58,9 +58,9 @@ func Init(args *InitArgs) (*Logger, error) {
 		writer = file
 	}
 
-	self.writer = writer
-	self.Logger = log.New(writer, args.Prefix, args.Flags)
-	return self, nil
+	l.writer = writer
+	l.Logger = log.New(writer, args.Prefix, args.Flags)
+	return l, nil
 }
 
 func (l *Logger) GetWriter() io.Writer {
