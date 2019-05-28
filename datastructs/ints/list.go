@@ -49,19 +49,6 @@ func (l *List) PushBack(n *ListNode) {
 	l.tail = n
 }
 
-func (l *List) PopFront() *ListNode {
-	if l.head == nil {
-		return nil
-	}
-	h := l.head
-	if h.next != nil {
-		l.head = h.next
-	} else {
-		l.head, l.tail = nil, nil
-	}
-	return h
-}
-
 func (l *List) InsertBefore(n, before *ListNode) {
 	if before != l.head {
 		n.prev, n.next = before.prev, before
@@ -80,6 +67,19 @@ func (l *List) InsertAfter(n, after *ListNode) {
 		n.prev, n.next = after, nil
 		after.next, l.tail = n, n
 	}
+}
+
+func (l *List) PopFront() *ListNode {
+	if l.head == nil {
+		return nil
+	}
+	h := l.head
+	if h.next != nil {
+		l.head = h.next
+	} else {
+		l.head, l.tail = nil, nil
+	}
+	return h
 }
 
 func (l *List) PopBack() *ListNode {
