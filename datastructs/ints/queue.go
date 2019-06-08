@@ -1,27 +1,23 @@
 package ints
 
-type Queue interface {
-	Empty() bool
-	Top() (int, bool)
-	Push(item int)
-	Pop() (int, bool)
-}
-
 type ListQueue struct {
-	l *List
+	l List
 }
 
-func NewListQueue() Stack {
-	return &ListQueue{&List{}}
+func (q *ListQueue) Init() *ListQueue {
+	q.l = List{}
+	q.l.Init()
+	return q
 }
 
 func (q *ListQueue) Empty() bool {
-	return nil == q.l.head
+	return 0 == q.l.Len()
 }
 
 func (q *ListQueue) Top() (int, bool) {
-	if nil != q.l.head {
-		return q.l.head.Val, true
+	h := q.l.Head()
+	if nil != h {
+		return h.Val, true
 	}
 	return 0, false
 }
@@ -31,9 +27,9 @@ func (q *ListQueue) Push(item int) {
 }
 
 func (q *ListQueue) Pop() (int, bool) {
-	head := s.l.PopFront()
-	if nil != head {
-		return head.Val, true
+	h := q.l.PopFront()
+	if nil != h {
+		return h.Val, true
 	}
 	return 0, false
 }
@@ -43,8 +39,9 @@ type ArrayQueue struct {
 	i   int
 }
 
-func NewArrayQueue() Queue {
-	return &ArrayQueue{[]int{}, 0}
+func (q *ArrayQueue) Init() *ArrayQueue {
+	q.arr = []int{}
+	return q
 }
 
 func (q *ArrayQueue) Empty() bool {

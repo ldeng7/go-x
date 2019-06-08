@@ -1,27 +1,23 @@
 package ints
 
-type Stack interface {
-	Empty() bool
-	Top() (int, bool)
-	Push(item int)
-	Pop() (int, bool)
-}
-
 type ListStack struct {
-	l *List
+	l List
 }
 
-func NewListStack() Stack {
-	return &ListStack{&List{}}
+func (s *ListStack) Init() *ListStack {
+	s.l = List{}
+	s.l.Init()
+	return s
 }
 
 func (s *ListStack) Empty() bool {
-	return nil == s.l.head
+	return 0 == s.l.Len()
 }
 
 func (s *ListStack) Top() (int, bool) {
-	if nil != s.l.tail {
-		return s.l.tail.Val, true
+	t := s.l.Tail()
+	if nil != t {
+		return t.Val, true
 	}
 	return 0, false
 }
@@ -31,9 +27,9 @@ func (s *ListStack) Push(item int) {
 }
 
 func (s *ListStack) Pop() (int, bool) {
-	tail := s.l.PopBack()
-	if nil != tail {
-		return tail.Val, true
+	t := s.l.PopBack()
+	if nil != t {
+		return t.Val, true
 	}
 	return 0, false
 }
@@ -42,8 +38,9 @@ type ArrayStack struct {
 	arr []int
 }
 
-func NewArrayStack() Stack {
-	return &ArrayStack{[]int{}}
+func (s *ArrayStack) Init() *ArrayStack {
+	s.arr = []int{}
+	return s
 }
 
 func (s *ArrayStack) Empty() bool {

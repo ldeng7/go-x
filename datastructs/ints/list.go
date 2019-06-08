@@ -2,107 +2,111 @@ package ints
 
 type ListNode struct {
 	Val  int
+	list *List
 	prev *ListNode
 	next *ListNode
 }
 
-func (n *ListNode) GetPrev() *ListNode {
-	return n.Prev
+func (n *ListNode) Prev() *ListNode {
+	if n1 := n.prev; nil != n.list && n1 != &n.list.root {
+		return n1
+	}
+	return nil
 }
 
-func (n *ListNode) GetNext() *ListNode {
-	return n.Next
+func (n *ListNode) Next() *ListNode {
+	if n1 := n.next; nil != n.list && n1 != &n.list.root {
+		return n1
+	}
+	return nil
 }
 
 type List struct {
-	head *ListNode
-	tail *ListNode
+	root ListNode
+	cnt  int
 }
 
-func (l *List) GetHead() *ListNode {
-	return l.head
+func (l *List) Init() *List {
+	l.root.next = &l.root
+	l.root.prev = &l.root
+	return l
 }
 
-func (l *List) GetTail() *ListNode {
-	return l.tail
+func (l *List) Len() int {
+	return l.cnt
+}
+
+func (l *List) Head() *ListNode {
+	if l.cnt != 0 {
+		return l.root.next
+	}
+	return nil
+}
+
+func (l *List) Tail() *ListNode {
+	if l.cnt != 0 {
+		return l.root.prev
+	}
+	return nil
+}
+
+func (l *List) insertAfter(n, mark *ListNode) {
+	next := mark.next
+	n.prev, n.next, n.list = mark, next, l
+	mark.next, next.prev = n, n
+	l.cnt++
+}
+
+func (l *List) InsertBefore(n, mark *ListNode) {
+	if nil == n.list || mark.list == l {
+		l.insertAfter(n, mark.prev)
+	}
+}
+
+func (l *List) InsertAfter(n, mark *ListNode) {
+	if nil == n.list || mark.list == l {
+		l.insertAfter(n, mark)
+	}
 }
 
 func (l *List) PushFront(n *ListNode) {
-	n.prev = nil
-	if l.head != nil {
-		l.head.prev = n
-	} else {
-		l.tail = n
+	if nil == n.list {
+		l.insertAfter(n, &l.root)
 	}
-	n.next = l.head
-	l.head = n
 }
 
 func (l *List) PushBack(n *ListNode) {
-	n.next = nil
-	if l.tail != nil {
-		l.tail.next = n
-	} else {
-		l.head = n
-	}
-	n.prev = l.tail
-	l.tail = n
-}
-
-func (l *List) InsertBefore(n, before *ListNode) {
-	if before != l.head {
-		n.prev, n.next = before.prev, before
-		n.prev.next, before.prev = n, n
-	} else {
-		n.prev, n.next = nil, before
-		before.prev, l.head = n, n
+	if nil == n.list {
+		l.insertAfter(n, l.root.prev)
 	}
 }
 
-func (l *List) InsertAfter(n, after *ListNode) {
-	if after != l.tail {
-		n.prev, n.next = after, after.next
-		n.next.prev, after.next = n, n
-	} else {
-		n.prev, n.next = after, nil
-		after.next, l.tail = n, n
+func (l *List) unlink(n *ListNode) {
+	n.prev.next, n.next.prev = n.next, n.prev
+	n.next, n.prev, n.list = nil, nil, nil
+	l.cnt--
+}
+
+func (l *List) Unlink(n *ListNode) {
+	if n.list == l {
+		l.unlink(n)
 	}
 }
 
 func (l *List) PopFront() *ListNode {
-	if l.head == nil {
-		return nil
+	if l.cnt != 0 {
+		n := l.root.next
+		l.unlink(n)
+		return n
 	}
-	h := l.head
-	if h.next != nil {
-		l.head = h.next
-	} else {
-		l.head, l.tail = nil, nil
-	}
-	return h
+	return nil
 }
 
 func (l *List) PopBack() *ListNode {
-	if l.tail == nil {
-		return nil
+	if l.cnt != 0 {
+		n := l.root.prev
+		l.unlink(n)
+		return n
 	}
-	r := l.tail
-	if r.prev != nil {
-		l.tail = r.prev
-	} else {
-		l.head, l.tail = nil, nil
-	}
-	return r
-}
-
-func (l *List) Unlink(n *ListNode) {
-	if l.head == n {
-		l.PopFront()
-		return
-	} else if l.tail == n {
-		l.PopBack()
-		return
-	}
-	n.prev.next = n.next
-	n.next.prev = n.prev
+	return nil
 }
