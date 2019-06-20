@@ -1,7 +1,9 @@
 package ints
 
+type listElemType = int
+
 type ListNode struct {
-	Val  int
+	Val  listElemType
 	list *List
 	prev *ListNode
 	next *ListNode

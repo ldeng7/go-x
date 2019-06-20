@@ -1,24 +1,10 @@
 package math
 
 func Gcd(a, b int) int {
-	if a != 0 && b != 0 {
-		ea, eb := a&1 == 0, b&1 == 0
-		if ea && eb {
-			return Gcd(a>>1, b>>1) << 1
-		} else if ea {
-			return Gcd(a>>1, b)
-		} else if eb {
-			return Gcd(a, b>>1)
-		} else if a <= b {
-			return Gcd(b-a, a)
-		} else {
-			return Gcd(a-b, b)
-		}
-	} else if a == 0 {
-		return b
-	} else {
+	if 0 == b {
 		return a
 	}
+	return Gcd(b, a%b)
 }
 
 func P(m, n int) int {
