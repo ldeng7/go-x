@@ -57,8 +57,8 @@ func (s *ArrayStack) Empty() bool {
 }
 
 func (s *ArrayStack) Top() *stackElemType {
-	if len(s.arr) != 0 {
-		return &s.arr[len(s.arr)-1]
+	if e := len(s.arr) - 1; e >= 0 {
+		return &s.arr[e]
 	}
 	return nil
 }
@@ -68,10 +68,10 @@ func (s *ArrayStack) Push(item stackElemType) {
 }
 
 func (s *ArrayStack) Pop() *stackElemType {
-	if len(s.arr) != 0 {
-		e := s.arr[len(s.arr)-1]
-		s.arr = s.arr[:len(s.arr)-1]
-		return &e
+	if e := len(s.arr) - 1; e >= 0 {
+		t := s.arr[e]
+		s.arr = s.arr[:e]
+		return &t
 	}
 	return nil
 }

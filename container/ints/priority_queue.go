@@ -95,3 +95,7 @@ func (pq *PriorityQueue) Set(index int, item pqElemType) {
 		pq.up(index)
 	}
 }
+
+func (pq *PriorityQueue) Abandon() []pqElemType {
+	return pq.arr
+}

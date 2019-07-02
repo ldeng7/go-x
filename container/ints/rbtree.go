@@ -19,7 +19,7 @@ func (n *RbtreeNode) Key() rbtKeyType {
 
 func (n *RbtreeNode) Prev() *RbtreeNode {
 	node := n
-	if node == node.tree.special.children[0] {
+	if nil == node.tree || node == node.tree.special.children[0] {
 		return nil
 	} else if nil != node.children[0] {
 		child := node.children[0]
@@ -39,7 +39,7 @@ func (n *RbtreeNode) Prev() *RbtreeNode {
 
 func (n *RbtreeNode) Next() *RbtreeNode {
 	node := n
-	if node == node.tree.special.children[1] {
+	if nil == node.tree || node == node.tree.special.children[1] {
 		return nil
 	} else if nil != node.children[1] {
 		node = node.children[1]
@@ -355,9 +355,11 @@ func (t *Rbtree) remove(node *RbtreeNode) *RbtreeNode {
 }
 
 func (t *Rbtree) RemoveAt(node *RbtreeNode) {
-	n := t.remove(node)
-	n.tree, n.parent, n.children[0], n.children[1] = nil, nil, nil, nil
-	t.cnt--
+	if node.tree == t {
+		n := t.remove(node)
+		n.tree, n.parent, n.children[0], n.children[1] = nil, nil, nil, nil
+		t.cnt--
+	}
 }
 
 func (t *Rbtree) RemoveRange(nodeBegin, nodeEnd *RbtreeNode) int {
