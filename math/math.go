@@ -16,7 +16,7 @@ func P(m, n int) int {
 }
 
 func C(m, n int) int {
-	if n-m > m {
+	if n-m < m {
 		m = n - m
 	}
 	out := n

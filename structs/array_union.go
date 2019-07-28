@@ -1,4 +1,4 @@
-package ints
+package structs
 
 type ArrayUnion struct {
 	arr []int

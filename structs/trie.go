@@ -1,3 +1,5 @@
+package structs
+
 type TrieNode struct {
 	children [26]*TrieNode
 	isWord   bool
