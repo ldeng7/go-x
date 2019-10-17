@@ -2,7 +2,7 @@ package ints
 
 type rbtKeyType = int
 type rbtElemType = int
-type rbtKeyLessCb = func(rbtKeyType, rbtKeyType) bool
+type rbtKeyCmpCb = func(rbtKeyType, rbtKeyType) bool
 
 type RbtreeNode struct {
 	Value    rbtElemType
@@ -61,10 +61,10 @@ func (n *RbtreeNode) Next() *RbtreeNode {
 type Rbtree struct {
 	special RbtreeNode
 	cnt     int
-	lessCb  rbtKeyLessCb
+	lessCb  rbtKeyCmpCb
 }
 
-func (t *Rbtree) Init(lessCb rbtKeyLessCb) *Rbtree {
+func (t *Rbtree) Init(lessCb rbtKeyCmpCb) *Rbtree {
 	t.lessCb = lessCb
 	sp := &t.special
 	sp.tree, sp.children[0], sp.children[1] = t, sp, sp

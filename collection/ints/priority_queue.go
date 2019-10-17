@@ -1,11 +1,11 @@
 package ints
 
 type pqElemType = int
-type pqElemLessCb = func(pqElemType, pqElemType) bool
+type pqElemCmpCb = func(pqElemType, pqElemType) bool
 
 type PriorityQueue struct {
 	arr    []pqElemType
-	lessCb pqElemLessCb
+	lessCb pqElemCmpCb
 }
 
 func (pq *PriorityQueue) up(j int) {
@@ -39,7 +39,7 @@ func (pq *PriorityQueue) down(i0, n int) bool {
 	return i > i0
 }
 
-func (pq *PriorityQueue) Init(arr []pqElemType, lessCb pqElemLessCb) *PriorityQueue {
+func (pq *PriorityQueue) Init(arr []pqElemType, lessCb pqElemCmpCb) *PriorityQueue {
 	pq.arr = arr
 	pq.lessCb = lessCb
 	l := len(pq.arr)
