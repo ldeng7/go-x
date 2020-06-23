@@ -29,7 +29,3 @@ func (au *ArrayUnion) GetRoot(i int) int {
 		i = r
 	}
 }
-
-func (au *ArrayUnion) SetRoot(i, v int) {
-	au.arr[i] = au.GetRoot(v)
-}
