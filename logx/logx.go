@@ -44,7 +44,7 @@ type Logger struct {
 	writer   io.Writer
 }
 
-func Init(args *InitArgs) (*Logger, error) {
+func New(args *InitArgs) (*Logger, error) {
 	self := &Logger{
 		LogLevel: args.LogLevel,
 	}
