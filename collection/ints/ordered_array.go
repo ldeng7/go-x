@@ -11,9 +11,9 @@ type OrderedArray struct {
 	eqCb   oaElemCmpCb
 }
 
-func (oa *OrderedArray) Init(arr []oaElemType, lessCb, eqCb oaElemCmpCb) *OrderedArray {
+func (oa *OrderedArray) Init(arr []oaElemType, sorted bool, lessCb, eqCb oaElemCmpCb) *OrderedArray {
 	oa.arr = arr
-	if len(arr) > 1 {
+	if (!sorted) && len(arr) > 1 {
 		sort.Slice(arr, func(i, j int) bool { return lessCb(arr[i], arr[j]) })
 	}
 	oa.lessCb = lessCb
@@ -93,10 +93,14 @@ func (oa *OrderedArray) Upsert(item oaElemType) {
 }
 
 func (oa *OrderedArray) RemoveAt(index int) {
-	if index != len(oa.arr)-1 {
-		copy(oa.arr[index:], oa.arr[index+1:])
+	if index != 0 {
+		if index != len(oa.arr)-1 {
+			copy(oa.arr[index:], oa.arr[index+1:])
+		}
+		oa.arr = oa.arr[:len(oa.arr)-1]
+	} else {
+		oa.arr = oa.arr[1:]
 	}
-	oa.arr = oa.arr[:len(oa.arr)-1]
 }
 
 func (oa *OrderedArray) RemoveOne(item oaElemType) {
@@ -108,10 +112,14 @@ func (oa *OrderedArray) RemoveOne(item oaElemType) {
 }
 
 func (oa *OrderedArray) RemoveRange(indexBegin, indexEnd int) {
-	if indexEnd != len(oa.arr) {
-		copy(oa.arr[indexBegin:], oa.arr[indexEnd:])
+	if indexBegin != 0 {
+		if indexEnd != len(oa.arr) {
+			copy(oa.arr[indexBegin:], oa.arr[indexEnd:])
+		}
+		oa.arr = oa.arr[:len(oa.arr)-(indexEnd-indexBegin)]
+	} else {
+		oa.arr = oa.arr[indexEnd:]
 	}
-	oa.arr = oa.arr[:len(oa.arr)-(indexEnd-indexBegin)]
 }
 
 func (oa *OrderedArray) Remove(item oaElemType) int {

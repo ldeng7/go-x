@@ -39,12 +39,14 @@ func (pq *PriorityQueue) down(i0, n int) bool {
 	return i > i0
 }
 
-func (pq *PriorityQueue) Init(arr []pqElemType, lessCb pqElemCmpCb) *PriorityQueue {
+func (pq *PriorityQueue) Init(arr []pqElemType, sorted bool, lessCb pqElemCmpCb) *PriorityQueue {
 	pq.arr = arr
 	pq.lessCb = lessCb
-	l := len(pq.arr)
-	for i := l>>1 - 1; i >= 0; i-- {
-		pq.down(i, l)
+	if !sorted {
+		l := len(pq.arr)
+		for i := l>>1 - 1; i >= 0; i-- {
+			pq.down(i, l)
+		}
 	}
 	return pq
 }

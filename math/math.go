@@ -8,24 +8,24 @@ func Gcd(a, b int) int {
 }
 
 func P(m, n int) int {
-	out := n
-	for i := n - 1; i > n-m; i-- {
-		out *= i
+	o := 1
+	for i := n; i > n-m; i-- {
+		o *= i
 	}
-	return out
+	return o
 }
 
 func C(m, n int) int {
 	if n-m < m {
 		m = n - m
 	}
-	out := n
-	for i := n - 1; i > n-m; i-- {
-		out *= i
+	o := 1
+	for i := n; i > n-m; i-- {
+		o *= i
 	}
-	d := m
-	for i := m - 1; i >= 2; i-- {
+	d := 1
+	for i := m; i > 1; i-- {
 		d *= i
 	}
-	return out / d
+	return o / d
 }
