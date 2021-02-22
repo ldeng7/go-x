@@ -1,30 +1,39 @@
 package structs
 
 type TrieNode struct {
-	children [26]*TrieNode
-	isWord   bool
+	children []*TrieNode
+	complete bool
 }
 
 type Trie struct {
-	root TrieNode
+	nChild      int
+	charToIndex func(byte) int
+	root        TrieNode
+}
+
+func (t *Trie) Init(nChild int, charToIndex func(byte) int) *Trie {
+	t.nChild = nChild
+	t.charToIndex = charToIndex
+	t.root.children = make([]*TrieNode, nChild)
+	return t
 }
 
 func (t *Trie) Add(word string) {
 	n := &t.root
 	for i := 0; i < len(word); i++ {
-		j := word[i] - 'a'
+		j := t.charToIndex(word[i])
 		if nil == n.children[j] {
-			n.children[j] = &TrieNode{}
+			n.children[j] = &TrieNode{children: make([]*TrieNode, t.nChild)}
 		}
 		n = n.children[j]
 	}
-	n.isWord = true
+	n.complete = true
 }
 
 func (t *Trie) find(key string) *TrieNode {
 	n := &t.root
 	for i := 0; i < len(key); i++ {
-		j := key[i] - 'a'
+		j := t.charToIndex(key[i])
 		if nil == n.children[j] {
 			return nil
 		}
@@ -35,7 +44,7 @@ func (t *Trie) find(key string) *TrieNode {
 
 func (t *Trie) Search(word string) bool {
 	if n := t.find(word); nil != n {
-		return n.isWord
+		return n.complete
 	}
 	return false
 }

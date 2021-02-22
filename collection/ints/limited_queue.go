@@ -1,15 +1,15 @@
 package ints
 
-type lqElemType = int
+type lqValType = int
 
 type ArrayLimitedQueue struct {
-	arr        []lqElemType
+	arr        []lqValType
 	capa, cnt  int
 	head, tail int
 }
 
 func (lq *ArrayLimitedQueue) Init(capa int) *ArrayLimitedQueue {
-	lq.arr = make([]lqElemType, capa)
+	lq.arr = make([]lqValType, capa)
 	lq.capa, lq.head = capa, capa-1
 	return lq
 }
@@ -22,7 +22,7 @@ func (lq *ArrayLimitedQueue) Full() bool {
 	return lq.cnt == lq.capa
 }
 
-func (lq *ArrayLimitedQueue) Top() *lqElemType {
+func (lq *ArrayLimitedQueue) Top() *lqValType {
 	if lq.cnt != 0 {
 		i := lq.head + 1
 		if i == lq.capa {
@@ -33,9 +33,9 @@ func (lq *ArrayLimitedQueue) Top() *lqElemType {
 	return nil
 }
 
-func (lq *ArrayLimitedQueue) Push(item lqElemType) bool {
+func (lq *ArrayLimitedQueue) Push(val lqValType) bool {
 	if lq.cnt != lq.capa {
-		lq.arr[lq.tail] = item
+		lq.arr[lq.tail] = val
 		lq.tail++
 		if lq.tail == lq.capa {
 			lq.tail = 0
@@ -46,7 +46,7 @@ func (lq *ArrayLimitedQueue) Push(item lqElemType) bool {
 	return false
 }
 
-func (lq *ArrayLimitedQueue) Pop() *lqElemType {
+func (lq *ArrayLimitedQueue) Pop() *lqValType {
 	if lq.cnt != 0 {
 		lq.head++
 		if lq.head == lq.capa {

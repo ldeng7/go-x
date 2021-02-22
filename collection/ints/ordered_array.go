@@ -2,16 +2,16 @@ package ints
 
 import "sort"
 
-type oaElemType = int
-type oaElemCmpCb = func(oaElemType, oaElemType) bool
+type oaValType = int
+type oaValCmpCb = func(oaValType, oaValType) bool
 
 type OrderedArray struct {
-	arr    []oaElemType
-	lessCb oaElemCmpCb
-	eqCb   oaElemCmpCb
+	arr    []oaValType
+	lessCb oaValCmpCb
+	eqCb   oaValCmpCb
 }
 
-func (oa *OrderedArray) Init(arr []oaElemType, sorted bool, lessCb, eqCb oaElemCmpCb) *OrderedArray {
+func (oa *OrderedArray) Init(arr []oaValType, sorted bool, lessCb, eqCb oaValCmpCb) *OrderedArray {
 	oa.arr = arr
 	if (!sorted) && len(arr) > 1 {
 		sort.Slice(arr, func(i, j int) bool { return lessCb(arr[i], arr[j]) })
@@ -25,15 +25,15 @@ func (oa *OrderedArray) Len() int {
 	return len(oa.arr)
 }
 
-func (oa *OrderedArray) Get(index int) oaElemType {
+func (oa *OrderedArray) Get(index int) oaValType {
 	return oa.arr[index]
 }
 
-func (oa *OrderedArray) LowerBound(item oaElemType) int {
+func (oa *OrderedArray) LowerBound(val oaValType) int {
 	i, j := 0, len(oa.arr)
 	for i < j {
 		h := i + (j-i)>>1
-		if oa.lessCb(oa.arr[h], item) {
+		if oa.lessCb(oa.arr[h], val) {
 			i = h + 1
 		} else {
 			j = h
@@ -42,11 +42,11 @@ func (oa *OrderedArray) LowerBound(item oaElemType) int {
 	return i
 }
 
-func (oa *OrderedArray) UpperBound(item oaElemType) int {
+func (oa *OrderedArray) UpperBound(val oaValType) int {
 	i, j := 0, len(oa.arr)
 	for i < j {
 		h := i + (j-i)>>1
-		if !oa.lessCb(item, oa.arr[h]) {
+		if !oa.lessCb(val, oa.arr[h]) {
 			i = h + 1
 		} else {
 			j = h
@@ -55,40 +55,40 @@ func (oa *OrderedArray) UpperBound(item oaElemType) int {
 	return i
 }
 
-func (oa *OrderedArray) EqualRange(item oaElemType) (int, int) {
-	i := oa.LowerBound(item)
-	if i == len(oa.arr) || !oa.eqCb(oa.arr[i], item) {
+func (oa *OrderedArray) EqualRange(val oaValType) (int, int) {
+	i := oa.LowerBound(val)
+	if i == len(oa.arr) || !oa.eqCb(oa.arr[i], val) {
 		return -1, -1
 	}
-	return i, oa.UpperBound(item)
+	return i, oa.UpperBound(val)
 }
 
-func (oa *OrderedArray) Exist(item oaElemType) (bool, int) {
-	i := oa.LowerBound(item)
-	return i != len(oa.arr) && !oa.eqCb(oa.arr[i], item), i
+func (oa *OrderedArray) Exist(val oaValType) (bool, int) {
+	i := oa.LowerBound(val)
+	return i != len(oa.arr) && !oa.eqCb(oa.arr[i], val), i
 }
 
-func (oa *OrderedArray) Add(item oaElemType) {
-	i := oa.LowerBound(item)
+func (oa *OrderedArray) Add(val oaValType) {
+	i := oa.LowerBound(val)
 	if i != len(oa.arr) {
 		oa.arr = append(oa.arr, 0)
 		copy(oa.arr[i+1:], oa.arr[i:])
-		oa.arr[i] = item
+		oa.arr[i] = val
 	} else {
-		oa.arr = append(oa.arr, item)
+		oa.arr = append(oa.arr, val)
 	}
 }
 
-func (oa *OrderedArray) Upsert(item oaElemType) {
-	i := oa.LowerBound(item)
+func (oa *OrderedArray) Upsert(val oaValType) {
+	i := oa.LowerBound(val)
 	if i != len(oa.arr) {
-		if !oa.eqCb(oa.arr[i], item) {
+		if !oa.eqCb(oa.arr[i], val) {
 			oa.arr = append(oa.arr, 0)
 			copy(oa.arr[i+1:], oa.arr[i:])
 		}
-		oa.arr[i] = item
+		oa.arr[i] = val
 	} else {
-		oa.arr = append(oa.arr, item)
+		oa.arr = append(oa.arr, val)
 	}
 }
 
@@ -103,9 +103,9 @@ func (oa *OrderedArray) RemoveAt(index int) {
 	}
 }
 
-func (oa *OrderedArray) RemoveOne(item oaElemType) {
-	i := oa.LowerBound(item)
-	if i == len(oa.arr) || !oa.eqCb(oa.arr[i], item) {
+func (oa *OrderedArray) RemoveOne(val oaValType) {
+	i := oa.LowerBound(val)
+	if i == len(oa.arr) || !oa.eqCb(oa.arr[i], val) {
 		return
 	}
 	oa.RemoveAt(i)
@@ -122,12 +122,12 @@ func (oa *OrderedArray) RemoveRange(indexBegin, indexEnd int) {
 	}
 }
 
-func (oa *OrderedArray) Remove(item oaElemType) int {
-	i := oa.LowerBound(item)
-	if i == len(oa.arr) || !oa.eqCb(oa.arr[i], item) {
+func (oa *OrderedArray) Remove(val oaValType) int {
+	i := oa.LowerBound(val)
+	if i == len(oa.arr) || !oa.eqCb(oa.arr[i], val) {
 		return 0
 	}
-	ie := oa.UpperBound(item)
+	ie := oa.UpperBound(val)
 	oa.RemoveRange(i, ie)
 	return ie - i
 }

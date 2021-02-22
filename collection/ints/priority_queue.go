@@ -1,21 +1,21 @@
 package ints
 
-type pqElemType = int
-type pqElemCmpCb = func(pqElemType, pqElemType) bool
+type pqValType = int
+type pqValCmpCb = func(pqValType, pqValType) bool
 
 type PriorityQueue struct {
-	arr    []pqElemType
-	lessCb pqElemCmpCb
+	arr    []pqValType
+	lessCb pqValCmpCb
 }
 
-func (pq *PriorityQueue) up(j int) {
+func (pq *PriorityQueue) up(i int) {
 	for {
-		i := (j - 1) / 2
-		if i == j || !pq.lessCb(pq.arr[j], pq.arr[i]) {
+		j := (i - 1) / 2
+		if j == i || !pq.lessCb(pq.arr[i], pq.arr[j]) {
 			break
 		}
-		pq.arr[i], pq.arr[j] = pq.arr[j], pq.arr[i]
-		j = i
+		pq.arr[j], pq.arr[i] = pq.arr[i], pq.arr[j]
+		i = j
 	}
 }
 
@@ -39,7 +39,7 @@ func (pq *PriorityQueue) down(i0, n int) bool {
 	return i > i0
 }
 
-func (pq *PriorityQueue) Init(arr []pqElemType, sorted bool, lessCb pqElemCmpCb) *PriorityQueue {
+func (pq *PriorityQueue) Init(arr []pqValType, sorted bool, lessCb pqValCmpCb) *PriorityQueue {
 	pq.arr = arr
 	pq.lessCb = lessCb
 	if !sorted {
@@ -55,7 +55,7 @@ func (pq *PriorityQueue) Len() int {
 	return len(pq.arr)
 }
 
-func (pq *PriorityQueue) Top() *pqElemType {
+func (pq *PriorityQueue) Top() *pqValType {
 	if len(pq.arr) != 0 {
 		e := pq.arr[0]
 		return &e
@@ -63,12 +63,12 @@ func (pq *PriorityQueue) Top() *pqElemType {
 	return nil
 }
 
-func (pq *PriorityQueue) Push(item pqElemType) {
-	pq.arr = append(pq.arr, item)
+func (pq *PriorityQueue) Push(val pqValType) {
+	pq.arr = append(pq.arr, val)
 	pq.up(len(pq.arr) - 1)
 }
 
-func (pq *PriorityQueue) Pop() *pqElemType {
+func (pq *PriorityQueue) Pop() *pqValType {
 	i := len(pq.arr) - 1
 	if i >= 0 {
 		pq.arr[0], pq.arr[i] = pq.arr[i], pq.arr[0]
@@ -91,13 +91,9 @@ func (pq *PriorityQueue) RemoveAt(index int) {
 	pq.arr = pq.arr[:j]
 }
 
-func (pq *PriorityQueue) Set(index int, item pqElemType) {
-	pq.arr[index] = item
+func (pq *PriorityQueue) Set(index int, val pqValType) {
+	pq.arr[index] = val
 	if !pq.down(index, len(pq.arr)) {
 		pq.up(index)
 	}
-}
-
-func (pq *PriorityQueue) Abandon() []pqElemType {
-	return pq.arr
 }

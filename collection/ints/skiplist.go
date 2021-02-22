@@ -17,11 +17,11 @@ var sklProbs = [sklMaxLevel - 1]int64{
 }
 
 type sklKeyType = int
-type sklElemType = int
+type sklValType = int
 type sklKeyCmpCb = func(sklKeyType, sklKeyType) bool
 
 type SkipListNode struct {
-	Value sklElemType
+	Value sklValType
 	key   sklKeyType
 	next  []*SkipListNode
 }
@@ -31,19 +31,19 @@ func (n *SkipListNode) Key() sklKeyType {
 }
 
 type SkipList struct {
-	eqCb      sklKeyCmpCb
-	lessCb    sklKeyCmpCb
 	root      SkipListNode
 	length    int
 	randSrc   rand.Source
 	prevNodes []*SkipListNode
+	eqCb      sklKeyCmpCb
+	lessCb    sklKeyCmpCb
 }
 
 func (l *SkipList) Init(eqCb, lessCb sklKeyCmpCb) *SkipList {
-	l.eqCb, l.lessCb = eqCb, lessCb
 	l.root.next = make([]*SkipListNode, sklMaxLevel)
 	l.randSrc = rand.NewSource(time.Now().UnixNano())
 	l.prevNodes = make([]*SkipListNode, sklMaxLevel)
+	l.eqCb, l.lessCb = eqCb, lessCb
 	return l
 }
 
@@ -79,7 +79,7 @@ func (l *SkipList) getPrevNodes(key sklKeyType) []*SkipListNode {
 	return prevs
 }
 
-func (l *SkipList) Add(key sklKeyType, value sklElemType) (*SkipListNode, bool) {
+func (l *SkipList) Add(key sklKeyType, value sklValType) (*SkipListNode, bool) {
 	prevs := l.getPrevNodes(key)
 	if e := prevs[0].next[0]; e != nil && l.eqCb(e.key, key) {
 		return e, false

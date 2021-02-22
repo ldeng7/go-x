@@ -1,15 +1,15 @@
 package ints
 
-type ldElemType = int
+type ldValType = int
 
 type ArrayLimitedDeque struct {
-	arr        []ldElemType
+	arr        []ldValType
 	capa, cnt  int
 	head, tail int
 }
 
 func (ld *ArrayLimitedDeque) Init(capa int) *ArrayLimitedDeque {
-	ld.arr = make([]ldElemType, capa)
+	ld.arr = make([]ldValType, capa)
 	ld.capa, ld.head = capa, capa-1
 	return ld
 }
@@ -22,7 +22,7 @@ func (ld *ArrayLimitedDeque) Full() bool {
 	return ld.cnt == ld.capa
 }
 
-func (ld *ArrayLimitedDeque) Head() *ldElemType {
+func (ld *ArrayLimitedDeque) Head() *ldValType {
 	if ld.cnt != 0 {
 		i := ld.head + 1
 		if i == ld.capa {
@@ -33,7 +33,7 @@ func (ld *ArrayLimitedDeque) Head() *ldElemType {
 	return nil
 }
 
-func (ld *ArrayLimitedDeque) Tail() *ldElemType {
+func (ld *ArrayLimitedDeque) Tail() *ldValType {
 	if ld.cnt != 0 {
 		i := ld.tail - 1
 		if i == -1 {
@@ -44,9 +44,9 @@ func (ld *ArrayLimitedDeque) Tail() *ldElemType {
 	return nil
 }
 
-func (ld *ArrayLimitedDeque) PushFront(item ldElemType) bool {
+func (ld *ArrayLimitedDeque) PushFront(val ldValType) bool {
 	if ld.cnt != ld.capa {
-		ld.arr[ld.head] = item
+		ld.arr[ld.head] = val
 		ld.head--
 		if ld.head == -1 {
 			ld.head = ld.capa - 1
@@ -57,9 +57,9 @@ func (ld *ArrayLimitedDeque) PushFront(item ldElemType) bool {
 	return false
 }
 
-func (ld *ArrayLimitedDeque) PushBack(item ldElemType) bool {
+func (ld *ArrayLimitedDeque) PushBack(val ldValType) bool {
 	if ld.cnt != ld.capa {
-		ld.arr[ld.tail] = item
+		ld.arr[ld.tail] = val
 		ld.tail++
 		if ld.tail == ld.capa {
 			ld.tail = 0
@@ -70,7 +70,7 @@ func (ld *ArrayLimitedDeque) PushBack(item ldElemType) bool {
 	return false
 }
 
-func (ld *ArrayLimitedDeque) PopFront() *ldElemType {
+func (ld *ArrayLimitedDeque) PopFront() *ldValType {
 	if ld.cnt != 0 {
 		ld.head++
 		if ld.head == ld.capa {
@@ -83,7 +83,7 @@ func (ld *ArrayLimitedDeque) PopFront() *ldElemType {
 	return nil
 }
 
-func (ld *ArrayLimitedDeque) PopBack() *ldElemType {
+func (ld *ArrayLimitedDeque) PopBack() *ldValType {
 	if ld.cnt != 0 {
 		ld.tail--
 		if ld.tail == -1 {

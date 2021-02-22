@@ -39,6 +39,16 @@ func (au *ArrayUnion) Get(i int) int {
 	return au.arr[i]
 }
 
+func (au *ArrayUnion) NumGroup() int {
+	ret := 0
+	for i, r := range au.arr {
+		if r == -1 || r == i {
+			ret++
+		}
+	}
+	return ret
+}
+
 func (au *ArrayUnion) Reset() {
 	l := len(au.arr)
 	for i := 0; i < l; i++ {

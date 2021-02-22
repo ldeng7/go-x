@@ -1,11 +1,11 @@
 package ints
 
 type rbtKeyType = int
-type rbtElemType = int
+type rbtValType = int
 type rbtKeyCmpCb = func(rbtKeyType, rbtKeyType) bool
 
 type RbtreeNode struct {
-	Value    rbtElemType
+	Value    rbtValType
 	key      rbtKeyType
 	tree     *Rbtree
 	isBlack  bool
@@ -199,7 +199,7 @@ func (t *Rbtree) add(node, pos, parent *RbtreeNode) {
 	sp.parent.isBlack = true
 }
 
-func (t *Rbtree) AddUnique(key rbtKeyType, value rbtElemType) (*RbtreeNode, bool) {
+func (t *Rbtree) AddUnique(key rbtKeyType, value rbtValType) (*RbtreeNode, bool) {
 	pos, parent := t.special.parent, &t.special
 	less := true
 	for nil != pos {
@@ -229,7 +229,7 @@ func (t *Rbtree) AddUnique(key rbtKeyType, value rbtElemType) (*RbtreeNode, bool
 	return p1, false
 }
 
-func (t *Rbtree) AddDupable(key rbtKeyType, value rbtElemType) *RbtreeNode {
+func (t *Rbtree) Add(key rbtKeyType, value rbtValType) *RbtreeNode {
 	pos, parent := t.special.parent, &t.special
 	for nil != pos {
 		parent = pos

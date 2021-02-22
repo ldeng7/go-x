@@ -30,7 +30,7 @@ func TestRbtree(t *testing.T) {
 		{
 			k := rand.Intn(l)
 			nums[0], m[k] = k, 1
-			node := tree.AddDupable(k, 0)
+			node := tree.Add(k, 0)
 			So(node.Key(), ShouldEqual, k)
 
 			So(tree.Len(), ShouldEqual, 1)
@@ -60,7 +60,7 @@ func TestRbtree(t *testing.T) {
 			k := rand.Intn(l)
 			nums, m[k] = append(nums, k), m[k]+1
 			sort.Ints(nums)
-			tree.AddDupable(k, 0)
+			tree.Add(k, 0)
 
 			So(tree.Len(), ShouldEqual, i)
 			head, tail := tree.Head(), tree.Tail()
