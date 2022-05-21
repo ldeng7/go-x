@@ -12,7 +12,7 @@ type Patch struct {
 	repCode []byte
 }
 
-func NewPatch(tar, rep interface{}) (*Patch, error) {
+func NewPatch(tar, rep any) (*Patch, error) {
 	tv, rv := reflect.ValueOf(tar), reflect.ValueOf(rep)
 	if tv.Kind() != reflect.Func || rv.Kind() != reflect.Func {
 		return nil, errors.New("invalid type")

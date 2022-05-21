@@ -1,23 +1,19 @@
-package ints
+package collectionx
 
-type rbtKeyType = int
-type rbtValType = int
-type rbtKeyCmpCb = func(rbtKeyType, rbtKeyType) bool
-
-type RbtreeNode struct {
-	Value    rbtValType
-	key      rbtKeyType
-	tree     *Rbtree
+type RBTreeNode[K any, V any] struct {
+	Value    V
+	key      K
+	tree     *RBTree[K, V]
 	isBlack  bool
-	parent   *RbtreeNode
-	children [2]*RbtreeNode
+	parent   *RBTreeNode[K, V]
+	children [2]*RBTreeNode[K, V]
 }
 
-func (n *RbtreeNode) Key() rbtKeyType {
+func (n *RBTreeNode[K, V]) Key() K {
 	return n.key
 }
 
-func (n *RbtreeNode) Prev() *RbtreeNode {
+func (n *RBTreeNode[K, V]) Prev() *RBTreeNode[K, V] {
 	node := n
 	if nil == node.tree || node == node.tree.special.children[0] {
 		return nil
@@ -37,7 +33,7 @@ func (n *RbtreeNode) Prev() *RbtreeNode {
 	return node
 }
 
-func (n *RbtreeNode) Next() *RbtreeNode {
+func (n *RBTreeNode[K, V]) Next() *RBTreeNode[K, V] {
 	node := n
 	if nil == node.tree || node == node.tree.special.children[1] {
 		return nil
@@ -58,44 +54,55 @@ func (n *RbtreeNode) Next() *RbtreeNode {
 	return node
 }
 
-type Rbtree struct {
-	special RbtreeNode
+type RBTree[K any, V any] struct {
+	special RBTreeNode[K, V]
 	cnt     int
-	lessCb  rbtKeyCmpCb
+	lessOp  func(K, K) bool
+	eqOp    func(K, K) bool
 }
 
-func (t *Rbtree) Init(lessCb rbtKeyCmpCb) *Rbtree {
-	t.lessCb = lessCb
+func (t *RBTree[K, V]) Init(lessOp func(K, K) bool) *RBTree[K, V] {
+	t.lessOp = lessOp
+	t.eqOp = func(a, b K) bool {
+		return (!lessOp(a, b)) && (!lessOp(b, a))
+	}
+	t.special = RBTreeNode[K, V]{}
 	sp := &t.special
-	sp.tree, sp.children[0], sp.children[1] = t, sp, sp
+	t.special.tree, t.special.children[0], t.special.children[1] = t, sp, sp
 	return t
 }
 
-func (t *Rbtree) Len() int {
+func (t *RBTree[K, V]) Len() int {
 	return t.cnt
 }
 
-func (t *Rbtree) Head() *RbtreeNode {
-	if 0 != t.cnt {
+func (t *RBTree[K, V]) Head() *RBTreeNode[K, V] {
+	if t.cnt != 0 {
 		return t.special.children[0]
 	}
 	return nil
 }
 
-func (t *Rbtree) Tail() *RbtreeNode {
-	if 0 != t.cnt {
+func (t *RBTree[K, V]) Tail() *RBTreeNode[K, V] {
+	if t.cnt != 0 {
 		return t.special.children[1]
 	}
 	return nil
 }
 
-func (t *Rbtree) LowerBound(key rbtKeyType) *RbtreeNode {
+func (t *RBTree[K, V]) ForEach(f func(*RBTreeNode[K, V])) {
+	for node := t.Head(); node != nil; node = node.Next() {
+		f(node)
+	}
+}
+
+func (t *RBTree[K, V]) LowerBound(key K) *RBTreeNode[K, V] {
 	node, parent := t.special.parent, &t.special
 	for nil != node {
-		if !t.lessCb(node.key, key) {
-			parent, node = node, node.children[0]
-		} else {
+		if t.lessOp(node.key, key) {
 			node = node.children[1]
+		} else {
+			parent, node = node, node.children[0]
 		}
 	}
 	if parent != &t.special {
@@ -104,13 +111,13 @@ func (t *Rbtree) LowerBound(key rbtKeyType) *RbtreeNode {
 	return nil
 }
 
-func (t *Rbtree) UpperBound(key rbtKeyType) *RbtreeNode {
+func (t *RBTree[K, V]) UpperBound(key K) *RBTreeNode[K, V] {
 	node, parent := t.special.parent, &t.special
 	for nil != node {
-		if t.lessCb(key, node.key) {
-			parent, node = node, node.children[0]
-		} else {
+		if !t.lessOp(key, node.key) {
 			node = node.children[1]
+		} else {
+			parent, node = node, node.children[0]
 		}
 	}
 	if parent != &t.special {
@@ -119,28 +126,34 @@ func (t *Rbtree) UpperBound(key rbtKeyType) *RbtreeNode {
 	return nil
 }
 
-func (t *Rbtree) EqualRange(key rbtKeyType) (*RbtreeNode, *RbtreeNode) {
+func (t *RBTree[K, V]) Exist(key K) (bool, *RBTreeNode[K, V]) {
 	node := t.LowerBound(key)
-	if node == nil || t.lessCb(key, node.key) {
+	if node == nil || t.lessOp(key, node.key) {
+		return false, nil
+	}
+	return true, node
+}
+
+func (t *RBTree[K, V]) EqualRange(key K) (*RBTreeNode[K, V], *RBTreeNode[K, V]) {
+	ok, node := t.Exist(key)
+	if !ok {
 		return nil, nil
 	}
 	return node, t.UpperBound(key)
 }
 
-func (t *Rbtree) Count(key rbtKeyType) int {
-	node := t.LowerBound(key)
-	if node == nil || t.lessCb(key, node.key) {
+func (t *RBTree[K, V]) Count(key K) int {
+	ok, node := t.Exist(key)
+	if !ok {
 		return 0
 	}
-	cnt := 1
-	node = node.Next()
-	for node != nil && node.key == key {
-		node, cnt = node.Next(), cnt+1
+	node, cnt := node.Next(), 1
+	for nodeEnd := t.UpperBound(key); node != nodeEnd; node, cnt = node.Next(), cnt+1 {
 	}
 	return cnt
 }
 
-func (t *Rbtree) rotate(node *RbtreeNode, dir uint8) {
+func (t *RBTree[K, V]) rotate(node *RBTreeNode[K, V], dir uint8) {
 	oppDir := dir ^ 1
 	child := node.children[oppDir]
 	node.children[oppDir] = child.children[dir]
@@ -158,9 +171,9 @@ func (t *Rbtree) rotate(node *RbtreeNode, dir uint8) {
 	child.children[dir], node.parent = node, child
 }
 
-func (t *Rbtree) add(node, pos, parent *RbtreeNode) {
+func (t *RBTree[K, V]) add(node, pos, parent *RBTreeNode[K, V]) {
 	sp := &t.special
-	if parent == sp || nil != pos || t.lessCb(node.key, parent.key) {
+	if parent == sp || nil != pos || t.lessOp(node.key, parent.key) {
 		parent.children[0] = node
 		if parent == sp {
 			sp.parent, sp.children[1] = node, node
@@ -199,19 +212,19 @@ func (t *Rbtree) add(node, pos, parent *RbtreeNode) {
 	sp.parent.isBlack = true
 }
 
-func (t *Rbtree) AddUnique(key rbtKeyType, value rbtValType) (*RbtreeNode, bool) {
+func (t *RBTree[K, V]) AddUnique(key K, value V) (*RBTreeNode[K, V], bool) {
 	pos, parent := t.special.parent, &t.special
 	less := true
 	for nil != pos {
 		parent = pos
-		less = t.lessCb(key, pos.key)
+		less = t.lessOp(key, pos.key)
 		if less {
 			pos = pos.children[0]
 		} else {
 			pos = pos.children[1]
 		}
 	}
-	node := &RbtreeNode{Value: value, key: key, tree: t}
+	node := &RBTreeNode[K, V]{Value: value, key: key, tree: t}
 	p1 := parent
 	if less {
 		if p1 == t.special.children[0] {
@@ -221,7 +234,7 @@ func (t *Rbtree) AddUnique(key rbtKeyType, value rbtValType) (*RbtreeNode, bool)
 			p1 = p1.Prev()
 		}
 	}
-	if t.lessCb(p1.key, key) {
+	if t.lessOp(p1.key, key) {
 		t.add(node, pos, parent)
 		return node, true
 	}
@@ -229,25 +242,25 @@ func (t *Rbtree) AddUnique(key rbtKeyType, value rbtValType) (*RbtreeNode, bool)
 	return p1, false
 }
 
-func (t *Rbtree) Add(key rbtKeyType, value rbtValType) *RbtreeNode {
+func (t *RBTree[K, V]) Add(key K, value V) *RBTreeNode[K, V] {
 	pos, parent := t.special.parent, &t.special
 	for nil != pos {
 		parent = pos
-		if t.lessCb(key, pos.key) {
+		if t.lessOp(key, pos.key) {
 			pos = pos.children[0]
 		} else {
 			pos = pos.children[1]
 		}
 	}
-	node := &RbtreeNode{Value: value, key: key, tree: t}
+	node := &RBTreeNode[K, V]{Value: value, key: key, tree: t}
 	t.add(node, pos, parent)
 	return node
 }
 
-func (t *Rbtree) remove(node *RbtreeNode) *RbtreeNode {
+func (t *RBTree[K, V]) remove(node *RBTreeNode[K, V]) *RBTreeNode[K, V] {
 	n0 := node
 	sp := &t.special
-	var c, cp *RbtreeNode
+	var c, cp *RBTreeNode[K, V]
 	if nil == node.children[0] {
 		c = node.children[1]
 	} else if nil == node.children[1] {
@@ -354,7 +367,7 @@ func (t *Rbtree) remove(node *RbtreeNode) *RbtreeNode {
 	return node
 }
 
-func (t *Rbtree) RemoveAt(node *RbtreeNode) {
+func (t *RBTree[K, V]) RemoveAt(node *RBTreeNode[K, V]) {
 	if node.tree == t {
 		n := t.remove(node)
 		n.tree, n.parent, n.children[0], n.children[1] = nil, nil, nil, nil
@@ -362,7 +375,7 @@ func (t *Rbtree) RemoveAt(node *RbtreeNode) {
 	}
 }
 
-func (t *Rbtree) RemoveRange(nodeBegin, nodeEnd *RbtreeNode) int {
+func (t *RBTree[K, V]) RemoveRange(nodeBegin, nodeEnd *RBTreeNode[K, V]) int {
 	cnt := t.cnt
 	for nodeBegin != nodeEnd {
 		next := nodeBegin.Next()
@@ -372,7 +385,22 @@ func (t *Rbtree) RemoveRange(nodeBegin, nodeEnd *RbtreeNode) int {
 	return cnt - t.cnt
 }
 
-func (t *Rbtree) Remove(key rbtKeyType) int {
-	nodeBegin, nodeEnd := t.LowerBound(key), t.UpperBound(key)
-	return t.RemoveRange(nodeBegin, nodeEnd)
+func (t *RBTree[K, V]) RemoveOne(key K) {
+	ok, node := t.Exist(key)
+	if !ok {
+		return
+	}
+	t.RemoveAt(node)
+}
+
+func (t *RBTree[K, V]) Remove(key K) int {
+	ok, node := t.Exist(key)
+	if !ok {
+		return 0
+	}
+	return t.RemoveRange(node, t.UpperBound(key))
+}
+
+func (t *RBTree[K, V]) Clear() {
+	t.Init(t.lessOp)
 }

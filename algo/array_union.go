@@ -1,4 +1,4 @@
-package structs
+package algo
 
 type ArrayUnion struct {
 	arr []int

@@ -1,4 +1,4 @@
-package ints
+package collectionx
 
 import (
 	"math/rand"
@@ -10,7 +10,7 @@ import (
 
 func TestRbtree(t *testing.T) {
 	Convey("test rbtree", t, func() {
-		tree := (&Rbtree{}).Init(func(a, b int) bool { return a < b })
+		tree := (&RBTree[int, int]{}).Init(func(a, b int) bool { return a < b })
 
 		{
 			So(tree.Len(), ShouldEqual, 0)

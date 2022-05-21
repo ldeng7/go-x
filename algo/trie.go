@@ -1,4 +1,4 @@
-package structs
+package algo
 
 type TrieNode struct {
 	children []*TrieNode
