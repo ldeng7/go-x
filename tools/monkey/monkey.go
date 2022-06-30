@@ -7,36 +7,33 @@ import (
 )
 
 type Patch struct {
-	tar     uintptr
-	tarCode []byte
-	repCode []byte
+	dst     uintptr
+	dstCode []byte
+	srcCode []byte
 }
 
-func NewPatch(tar, rep any) (*Patch, error) {
-	tv, rv := reflect.ValueOf(tar), reflect.ValueOf(rep)
-	if tv.Kind() != reflect.Func || rv.Kind() != reflect.Func {
+func NewPatch(dst, src any) (*Patch, error) {
+	dv, sv := reflect.ValueOf(dst), reflect.ValueOf(src)
+	if dv.Kind() != reflect.Func || sv.Kind() != reflect.Func {
 		return nil, errors.New("invalid type")
-	} else if tv.Type() != rv.Type() {
+	} else if dv.Type() != sv.Type() {
 		return nil, errors.New("unequal type of functions")
-	} else if 0 == tv.Pointer() || 0 == rv.Pointer() {
+	} else if dv.Pointer() == 0 || sv.Pointer() == 0 {
 		return nil, errors.New("nil function")
 	}
 
-	// fetch rv.ptr, as reflect.unpackEface()
-	rp := uintptr(unsafe.Pointer(&rep)) + unsafe.Sizeof(uintptr(0))
-	code := getJumpCode(*(*uintptr)(unsafe.Pointer(rp)))
-	l := len(code)
-
-	patch := &Patch{tv.Pointer(), make([]byte, l), code}
-	tarCode := *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{patch.tar, l, l}))
-	copy(patch.tarCode, tarCode)
+	srcCode := getJumpCode(sv.Pointer())
+	l := len(srcCode)
+	patch := &Patch{dv.Pointer(), make([]byte, l), srcCode}
+	dstCode := *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{patch.dst, l, l}))
+	copy(patch.dstCode, dstCode)
 	return patch, nil
 }
 
 func (p *Patch) Patch() error {
-	return writeCode(p.tar, p.repCode)
+	return writeCode(p.dst, p.srcCode)
 }
 
 func (p *Patch) Unpatch() error {
-	return writeCode(p.tar, p.tarCode)
+	return writeCode(p.dst, p.dstCode)
 }

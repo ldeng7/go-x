@@ -7,10 +7,9 @@ import (
 
 func getJumpCode(f uintptr) []byte {
 	buf := &bytes.Buffer{}
-	buf.WriteByte(0x48)
 	buf.WriteByte(0xba)
-	binary.Write(buf, binary.LittleEndian, uint64(f))
+	binary.Write(buf, binary.LittleEndian, uint32(f))
 	buf.WriteByte(0xff)
-	buf.WriteByte(0x22)
+	buf.WriteByte(0xe2)
 	return buf.Bytes()
 }
