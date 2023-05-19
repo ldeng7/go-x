@@ -7,20 +7,23 @@ import (
 
 type LessOp[T any] func(T, T) bool
 
+func greaterOp[T any](lessOp LessOp[T]) LessOp[T] {
+	return func(a, b T) bool { return lessOp(b, a) }
+}
+
 // heap sort
 
-func SliceHeapSort[T any](sl []T, lessOp LessOp[T]) {
-	h := (&collectionx.BinaryHeap[T]{}).Init(sl, false, lessOp)
+func SliceHeapSort[T any](sl []T, heapified bool, lessOp LessOp[T]) {
+	h := (&collectionx.BinaryHeap[T]{}).Init(sl, heapified, greaterOp(lessOp))
 	l := len(sl)
-	for i := l - 1; i >= 0; i-- {
+	for i := l - 1; i > 0; i-- {
 		e, _ := h.Pop()
 		sl[i] = e
 	}
-	SliceReverse(sl)
 }
 
-func SliceHeapSortIntrincs[T common.IntrincsOrd](sl []T) {
-	SliceHeapSort(sl, IntrincsLess[T])
+func SliceHeapSortIntrincs[T common.IntrincsOrd](sl []T, heapified bool) {
+	SliceHeapSort(sl, heapified, IntrincsLess[T])
 }
 
 type sortSolver[T any] struct {
@@ -128,7 +131,7 @@ func (ss *sortSolver[T]) quickSort(i, j, maxDepth int) {
 	sl := ss.sl
 	for j-i > 12 {
 		if maxDepth == 0 {
-			SliceHeapSort(sl[i:j], ss.lessOp)
+			SliceHeapSort(sl[i:j], false, ss.lessOp)
 			return
 		}
 		maxDepth--
@@ -272,15 +275,15 @@ func SliceStableSortIntrincs[T common.IntrincsOrd](sl []T) {
 // partial sort
 
 func SlicePartialSort[T any](sl []T, n int, lessOp LessOp[T]) {
-	h := (&collectionx.BinaryHeap[T]{}).Init(sl[:n], false, func(a, b T) bool { return lessOp(b, a) })
+	h := (&collectionx.BinaryHeap[T]{}).Init(sl[:n], false, greaterOp(lessOp))
 	l := len(sl)
 	for i := n; i < l; i++ {
 		if e, t := sl[i], sl[0]; lessOp(e, t) {
-			h.SetTop(e)
+			h.Set(0, e)
 			sl[i] = t
 		}
 	}
-	SliceHeapSort(sl[:n], lessOp)
+	SliceHeapSort(sl[:n], true, lessOp)
 }
 
 func SlicePartialSortIntrincs[T common.IntrincsOrd](sl []T, n int) {

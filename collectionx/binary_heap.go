@@ -35,10 +35,10 @@ func (bh *BinaryHeap[T]) down(i0 int) bool {
 	return i > i0
 }
 
-func (bh *BinaryHeap[T]) Init(arr []T, sorted bool, lessOp func(T, T) bool) *BinaryHeap[T] {
+func (bh *BinaryHeap[T]) Init(arr []T, heapified bool, lessOp func(T, T) bool) *BinaryHeap[T] {
 	bh.arr = arr
 	bh.lessOp = lessOp
-	if !sorted {
+	if !heapified {
 		l := len(bh.arr)
 		for i := l/2 - 1; i >= 0; i-- {
 			bh.down(i)
@@ -69,14 +69,8 @@ func (bh *BinaryHeap[T]) Push(val T) {
 }
 
 func (bh *BinaryHeap[T]) Pop() (T, bool) {
-	j := len(bh.arr) - 1
-	if j >= 0 {
-		e, ej := bh.arr[0], bh.arr[j]
-		bh.arr = bh.arr[:j]
-		if j != 0 {
-			bh.SetTop(ej)
-		}
-		return e, true
+	if len(bh.arr) != 0 {
+		return bh.RemoveAt(0), true
 	}
 	var t T
 	return t, false
@@ -92,14 +86,9 @@ func (bh *BinaryHeap[T]) RemoveAt(index int) T {
 	return e
 }
 
-func (bh *BinaryHeap[T]) SetTop(val T) {
-	bh.arr[0] = val
-	bh.down(0)
-}
-
 func (bh *BinaryHeap[T]) Set(index int, val T) {
 	bh.arr[index] = val
-	if !bh.down(index) {
+	if !bh.down(index) && index > 0 {
 		bh.up(index)
 	}
 }
